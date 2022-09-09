@@ -4,23 +4,28 @@ use std::future::Future;
 use std::pin::Pin;
 
 pub trait Tokener {
-    fn gen(&self, id: i64) -> Pin<Box<dyn Future<Output = Result<String, Error>>>>;
-    fn verify(&self, token: &str) -> Pin<Box<dyn Future<Output = Result<i64, Error>>>>;
+    fn gen<'a>(&'a self, id: i32) -> Pin<Box<dyn Future<Output = Result<String, Error>> + 'a>>;
+    fn verify<'a>(
+        &'a self,
+        token: &'a str,
+    ) -> Pin<Box<dyn Future<Output = Result<i32, Error>> + 'a>>;
 }
 
 pub trait Storer {
-    fn exists(&self, username: &str) -> Pin<Box<dyn Future<Output = Result<bool, Error>>>>;
-    fn insert(
-        &self,
-        username: &str,
-        password: &str,
-    ) -> Pin<Box<dyn Future<Output = Result<i64, Error>>>>;
-    fn update(
-        &self,
-        username: &str,
-        password: &str,
-    ) -> Pin<Box<dyn Future<Output = Result<(), Error>>>>;
-    fn get(&self, username: &str) -> Pin<Box<dyn Future<Output = Result<Account, Error>>>>;
+    fn exists<'a>(
+        &'a self,
+        username: &'a str,
+    ) -> Pin<Box<dyn Future<Output = Result<bool, Error>> + 'a>>;
+    fn insert<'a>(
+        &'a self,
+        username: &'a str,
+        password: &'a str,
+        salt: &'a str,
+    ) -> Pin<Box<dyn Future<Output = Result<i32, Error>> + 'a>>;
+    fn get<'a>(
+        &'a self,
+        username: &'a str,
+    ) -> Pin<Box<dyn Future<Output = Result<Account, Error>> + 'a>>;
 }
 
 pub trait Hasher {
@@ -37,7 +42,7 @@ pub fn signup<'a, S: Storer + 'a, H: Hasher + 'a>(
     password: &'a str,
     storer: S,
     hasher: H,
-) -> Pin<Box<dyn Future<Output = Result<i64, Error>> + 'a>> {
+) -> Pin<Box<dyn Future<Output = Result<i32, Error>> + 'a>> {
     Box::pin(async move {
         let is_exists = storer.exists(username).await?;
         if is_exists {
@@ -45,7 +50,7 @@ pub fn signup<'a, S: Storer + 'a, H: Hasher + 'a>(
         }
         let salt = hasher.gen_salt().await?;
         let hashed_password = hasher.hash(password, &salt).await?;
-        storer.insert(username, &hashed_password).await
+        storer.insert(username, &hashed_password, &salt).await
     })
 }
 
@@ -64,4 +69,11 @@ pub fn signin<'a, S: Storer + 'a, H: Hasher + 'a, T: Tokener + 'a>(
         }
         tokener.gen(account.id).await
     })
+}
+
+pub fn verify_token<'a, T: Tokener + 'a>(
+    token: &'a str,
+    tokener: T,
+) -> Pin<Box<dyn Future<Output = Result<i32, Error>> + 'a>> {
+    Box::pin(async move { tokener.verify(token).await })
 }
