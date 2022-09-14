@@ -77,3 +77,10 @@ pub fn verify_token<'a, T: Tokener + 'a>(
 ) -> Pin<Box<dyn Future<Output = Result<i32, Error>> + 'a>> {
     Box::pin(async move { tokener.verify(token).await })
 }
+
+pub fn exists<'a, S: Storer + 'a>(
+    username: &'a str,
+    storer: S,
+) -> Pin<Box<dyn Future<Output = Result<bool, Error>> + 'a>> {
+    Box::pin(async move { storer.exists(username).await })
+}

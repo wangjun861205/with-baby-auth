@@ -8,10 +8,12 @@ pub const FAILED_TO_VERIFY_TOKEN: Code = 5;
 pub const FAILED_TO_CONNECT_TO_DATABASE: Code = 6;
 pub const FAILED_TO_GET_DATABASE_CONNECTION: Code = 7;
 pub const FAILED_TO_LOAD_RECORD: Code = 8;
+pub const FAILED_TO_HASH_PASSWORD: Code = 8;
 
+#[derive(Debug)]
 pub struct Error {
-    msg: String,
-    code: Code,
+    pub msg: String,
+    pub code: Code,
 }
 
 impl Error {

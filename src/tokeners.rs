@@ -19,10 +19,10 @@ impl JWTTokener {
     }
 }
 
-#[derive(Serialize, Deserialize)]
-struct UID(i32);
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UID(i32);
 
-impl Tokener for JWTTokener {
+impl Tokener for &JWTTokener {
     fn gen<'a>(
         &'a self,
         id: i32,

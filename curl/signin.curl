@@ -1,0 +1,4 @@
+url=http://localhost:8000/signin
+header=Content-Type:application/json
+data=@signin.json
+dump-header=headers.txt

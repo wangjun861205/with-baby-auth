@@ -27,7 +27,7 @@ impl PgStorer {
     }
 }
 
-impl Storer for PgStorer {
+impl Storer for &PgStorer {
     fn exists<'a>(
         &'a self,
         name: &'a str,
