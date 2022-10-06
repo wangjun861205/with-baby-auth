@@ -1,7 +1,7 @@
-use crate::core::{self, Hasher, Storer, Tokener};
+use crate::core;
 use crate::errors::{self, Error};
 use crate::hashers::SHA384Hasher;
-use crate::storers::PgStorer;
+use crate::storers::MongoStorer;
 use crate::tokeners::JWTTokener;
 use actix_header::actix_header;
 use actix_web::body::BoxBody;
@@ -35,7 +35,7 @@ pub struct SignupRequest {
 
 pub async fn signup(
     hasher: Data<SHA384Hasher>,
-    storer: Data<PgStorer>,
+    storer: Data<MongoStorer>,
     Json(data): Json<SignupRequest>,
 ) -> Result<String, Error> {
     let id = core::signup(
@@ -56,7 +56,7 @@ pub struct SigninRequest {
 
 pub async fn signin(
     hasher: Data<SHA384Hasher>,
-    storer: Data<PgStorer>,
+    storer: Data<MongoStorer>,
     tokener: Data<JWTTokener>,
     Json(data): Json<SigninRequest>,
 ) -> Result<HttpResponse, Error> {
@@ -107,7 +107,7 @@ pub struct ExistsResponse {
 }
 
 pub async fn exists(
-    storer: Data<PgStorer>,
+    storer: Data<MongoStorer>,
     Query(ExistsRequest { username }): Query<ExistsRequest>,
 ) -> Result<Json<ExistsResponse>, Error> {
     Ok(Json(ExistsResponse {
