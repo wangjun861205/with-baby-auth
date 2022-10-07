@@ -11,7 +11,7 @@ pub trait Tokener {
     ) -> Pin<Box<dyn Future<Output = Result<i32, Error>> + 'a>>;
 }
 
-pub trait Storer {
+pub trait Storer<T> {
     fn exists<'a>(
         &'a self,
         username: &'a str,
@@ -21,7 +21,7 @@ pub trait Storer {
         username: &'a str,
         password: &'a str,
         salt: &'a str,
-    ) -> Pin<Box<dyn Future<Output = Result<i32, Error>> + 'a>>;
+    ) -> Pin<Box<dyn Future<Output = Result<T, Error>> + 'a>>;
     fn get<'a>(
         &'a self,
         username: &'a str,
@@ -37,12 +37,12 @@ pub trait Hasher {
     ) -> Pin<Box<dyn Future<Output = Result<String, Error>>>>;
 }
 
-pub fn signup<'a, S: Storer + 'a, H: Hasher + 'a>(
+pub fn signup<'a, ST, S: Storer<ST> + 'a, H: Hasher + 'a>(
     username: &'a str,
     password: &'a str,
     storer: S,
     hasher: H,
-) -> Pin<Box<dyn Future<Output = Result<i32, Error>> + 'a>> {
+) -> Pin<Box<dyn Future<Output = Result<ST, Error>> + 'a>> {
     Box::pin(async move {
         let is_exists = storer.exists(username).await?;
         if is_exists {
@@ -54,7 +54,7 @@ pub fn signup<'a, S: Storer + 'a, H: Hasher + 'a>(
     })
 }
 
-pub fn signin<'a, S: Storer + 'a, H: Hasher + 'a, T: Tokener + 'a>(
+pub fn signin<'a, ST, S: Storer<ST> + 'a, H: Hasher + 'a, T: Tokener + 'a>(
     username: &'a str,
     password: &'a str,
     storer: S,
@@ -78,7 +78,7 @@ pub fn verify_token<'a, T: Tokener + 'a>(
     Box::pin(async move { tokener.verify(token).await })
 }
 
-pub fn exists<'a, S: Storer + 'a>(
+pub fn exists<'a, ST, S: Storer<ST> + 'a>(
     username: &'a str,
     storer: S,
 ) -> Pin<Box<dyn Future<Output = Result<bool, Error>> + 'a>> {

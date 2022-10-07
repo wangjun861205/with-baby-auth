@@ -28,7 +28,7 @@ impl PgStorer {
     }
 }
 
-impl Storer for &PgStorer {
+impl Storer<i32> for &PgStorer {
     fn exists<'a>(
         &'a self,
         name: &'a str,
@@ -107,7 +107,7 @@ impl MongoStorer {
     }
 }
 
-impl Storer for &MongoStorer {
+impl Storer<String> for &MongoStorer {
     fn exists<'a>(
         &'a self,
         name: &'a str,
@@ -150,7 +150,7 @@ impl Storer for &MongoStorer {
         name: &'a str,
         pwd: &'a str,
         slt: &'a str,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<i32, Error>> + 'a>> {
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<String, Error>> + 'a>> {
         Box::pin(async move {
             let inserted_id = self
                 .client
@@ -170,7 +170,7 @@ impl Storer for &MongoStorer {
                 .as_object_id()
                 .unwrap()
                 .to_hex();
-            Ok(i32::from_str_radix(&inserted_id, 16).unwrap())
+            Ok(inserted_id)
         })
     }
 }
@@ -183,7 +183,7 @@ mod test {
     #[tokio::test]
     async fn test_insert() {
         let s = &MongoStorer::new("mongodb://localhost:27017").await.unwrap();
-        let id = s.insert("wangjun", "password", "salt").await.unwrap();
+        let id = s.insert("tongyao", "password", "salt").await.unwrap();
         println!("{:?}", id)
     }
 }
