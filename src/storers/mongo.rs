@@ -1,3 +1,7 @@
+use crate::core::Storer;
+use crate::errors::{self, Error};
+use mongodb::bson::Bson;
+
 use mongodb::{
     bson::{self, doc},
     options::ClientOptions,

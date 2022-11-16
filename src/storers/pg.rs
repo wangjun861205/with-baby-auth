@@ -10,7 +10,6 @@ use diesel::{
     pg::PgConnection,
     r2d2::{ConnectionManager, Pool},
 };
-use mongodb::bson::Bson;
 
 use crate::models::AccountInsertion;
 

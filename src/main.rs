@@ -12,22 +12,30 @@ extern crate diesel;
 
 use actix_web::web::{get, post, Data};
 use dotenv::dotenv;
+use env_logger;
 use hashers::SHA384Hasher;
-use storers::MongoStorer;
+use log::warn;
+use storers::mongo::MongoStorer;
 use tokeners::JWTTokener;
 
 #[actix_web::main]
 async fn main() -> Result<(), std::io::Error> {
-    dotenv().expect("failed to load .env");
-    let storer =
-        MongoStorer::new(&dotenv::var("DATABASE_URL").expect("DATABASE_URL not exists in .env"))
-            .await
-            .expect("failed to create MongoStorer");
+    env_logger::init();
+    if let Err(e) = dotenv() {
+        warn!("failed to load .env: {}", e);
+    }
+    let storer = MongoStorer::new(
+        &dotenv::var("DATABASE_URL").expect("environment variable DATABASE_URL not exists"),
+    )
+    .await
+    .expect("failed to create MongoStorer");
     actix_web::HttpServer::new(move || {
         actix_web::App::new()
             .app_data(Data::new(
-                JWTTokener::new(&dotenv::var("JWT_KEY").expect("JWT_KEY not exists in .env"))
-                    .expect("failed to create JWTTokener"),
+                JWTTokener::new(
+                    &dotenv::var("JWT_KEY").expect("environment varialbe JWT_KEY not exists"),
+                )
+                .expect("failed to create JWTTokener"),
             ))
             .app_data(Data::new(SHA384Hasher {}))
             .app_data(Data::new(storer.clone()))
@@ -37,8 +45,8 @@ async fn main() -> Result<(), std::io::Error> {
             .route("exists", get().to(handlers::exists))
     })
     .bind(format!(
-        "0.0.0.0:{}",
-        dotenv::var("PORT").unwrap_or("8000".into())
+        "{}",
+        dotenv::var("ADDRESS").unwrap_or("0.0.0.0:8000".into())
     ))
     .expect("failed to bind server address")
     .run()
