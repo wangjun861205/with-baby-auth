@@ -1,7 +1,7 @@
 use crate::core;
 use crate::errors::{self, Error};
 use crate::hashers::SHA384Hasher;
-use crate::storers::MongoStorer;
+use crate::storers::mongo::MongoStorer;
 use crate::tokeners::JWTTokener;
 use actix_header::actix_header;
 use actix_web::body::BoxBody;
