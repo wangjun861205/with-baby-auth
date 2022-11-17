@@ -1,15 +1,10 @@
 use crate::core;
-use crate::errors::{self, Error};
+use crate::errors::Error;
 use crate::hashers::sha::SHA384Hasher;
 use crate::storers::mongo::MongoStorer;
 use crate::tokeners::jwt::JWTTokener;
 use actix_header::actix_header;
-use actix_web::body::BoxBody;
-use actix_web::{
-    http::StatusCode,
-    web::{Data, Header, Json, Path, Query},
-    HttpResponse, ResponseError,
-};
+use actix_web::web::{Data, Json, Path, Query};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize)]
@@ -77,11 +72,6 @@ pub async fn verify_token(
 ) -> Result<String, Error> {
     let uid = core::verify_token(&token.0, tokener.as_ref()).await?;
     Ok(uid.to_string())
-}
-
-#[derive(Debug, Deserialize)]
-pub struct ExistsRequest {
-    username: String,
 }
 
 #[derive(Debug, Serialize)]
