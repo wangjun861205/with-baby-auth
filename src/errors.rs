@@ -1,3 +1,5 @@
+use actix_web::{body::BoxBody, http::StatusCode, HttpResponse, ResponseError};
+
 type Code = i32;
 
 pub const ACCOUNT_ALREADY_EXISTS: Code = 1;
@@ -32,5 +34,20 @@ impl Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.msg)
+    }
+}
+
+impl ResponseError for Error {
+    fn error_response(&self) -> HttpResponse<actix_web::body::BoxBody> {
+        if self.code == INVALID_CREDENTIAL || self.code == FAILED_TO_VERIFY_TOKEN {
+            return HttpResponse::with_body(
+                StatusCode::FORBIDDEN,
+                BoxBody::new(self.msg.to_owned()),
+            );
+        }
+        HttpResponse::with_body(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            BoxBody::new(self.msg.to_owned()),
+        )
     }
 }

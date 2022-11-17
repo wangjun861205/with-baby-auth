@@ -40,9 +40,12 @@ async fn main() -> Result<(), std::io::Error> {
             .app_data(Data::new(SHA384Hasher {}))
             .app_data(Data::new(storer.clone()))
             .route("signup", post().to(handlers::signup))
-            .route("signin", post().to(handlers::signin))
-            .route("verify", get().to(handlers::verify))
-            .route("exists", get().to(handlers::exists))
+            .route("signin", get().to(handlers::signin))
+            .route("verify_token/{token}", get().to(handlers::verify_token))
+            .route(
+                "validate_username/{username}",
+                get().to(handlers::validate_username),
+            )
     })
     .bind(format!(
         "{}",
