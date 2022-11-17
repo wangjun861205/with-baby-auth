@@ -1,0 +1,94 @@
+openapi: 3.0.0
+info:
+  title: with-baby-auth接口文档
+  description: 本服务提供简单的认证功能
+  version: 1.0.0
+
+components:
+  schemas:
+    Request:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+paths:
+  /signup:
+    post:
+      summary: 注册
+      description: 通过用户名密码注册用户
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/Request"
+      responses:
+        200:
+          description: 成功注册返回uid
+          content:
+            text/plain:
+              schema:
+                description: uid
+                type: string
+                example: 46
+        409:
+          description: 用户名已存在
+          content:
+            text/plain:
+              schema:
+                description: error
+                type: string
+                example: 用户名已存在
+  
+  /signin:
+    get:
+      summary: 登录
+      description: 通过用户名密码登录
+      parameters:
+        - in: query
+          name: username
+          required: true
+          schema:
+            type: string
+        
+        - in: query
+          name: password
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 登录成功返回Token
+          content:
+            text/plain:
+              schema:
+                description: token
+                type: string
+        400:
+          description: 登录失败
+          content:
+            text/plain:
+              schema:
+                description: error
+                type: string
+                example: 用户名或密码错误
+            
+            
+
+            
+              
+              
+
+
+
+
+
+
+            
+        
