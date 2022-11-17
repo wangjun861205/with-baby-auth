@@ -28,12 +28,14 @@ impl PgStorer {
 }
 
 impl Storer<i32> for &PgStorer {
-    fn exists<'a>(
-        &'a self,
-        name: &'a str,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<bool, Error>> + 'a>> {
+    fn exists(
+        self,
+        name: &str,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<bool, Error>>>> {
+        let pool = self.pool.clone();
+        let name = name.to_owned();
         Box::pin(async move {
-            let mut conn = self.pool.get().map_err(|e| {
+            let mut conn = pool.get().map_err(|e| {
                 Error::new(&e.to_string(), errors::FAILED_TO_GET_DATABASE_CONNECTION)
             })?;
             let res: bool = select(exists(accounts.filter(username.eq(name))))
@@ -43,14 +45,15 @@ impl Storer<i32> for &PgStorer {
         })
     }
 
-    fn get<'a>(
-        &'a self,
-        name: &'a str,
-    ) -> std::pin::Pin<
-        Box<dyn std::future::Future<Output = Result<crate::models::Account, Error>> + 'a>,
-    > {
+    fn get(
+        self,
+        name: &str,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<crate::models::Account, Error>>>>
+    {
+        let pool = self.pool.clone();
+        let name = name.to_owned();
         Box::pin(async move {
-            let mut conn = self.pool.get().map_err(|e| {
+            let mut conn = pool.get().map_err(|e| {
                 Error::new(&e.to_string(), errors::FAILED_TO_GET_DATABASE_CONNECTION)
             })?;
             accounts
@@ -60,14 +63,18 @@ impl Storer<i32> for &PgStorer {
         })
     }
 
-    fn insert<'a>(
-        &'a self,
-        name: &'a str,
-        pwd: &'a str,
-        slt: &'a str,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<i32, Error>> + 'a>> {
+    fn insert(
+        self,
+        name: &str,
+        pwd: &str,
+        slt: &str,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<i32, Error>>>> {
+        let pool = self.pool.clone();
+        let name = name.to_owned();
+        let pwd = pwd.to_owned();
+        let slt = slt.to_owned();
         Box::pin(async move {
-            let mut conn = self.pool.get().map_err(|e| {
+            let mut conn = pool.get().map_err(|e| {
                 Error::new(&e.to_string(), errors::FAILED_TO_GET_DATABASE_CONNECTION)
             })?;
             diesel::insert_into(accounts)

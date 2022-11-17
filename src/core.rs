@@ -4,40 +4,28 @@ use std::future::Future;
 use std::pin::Pin;
 
 pub trait Tokener {
-    fn gen<'a>(&'a self, id: i32) -> Pin<Box<dyn Future<Output = Result<String, Error>> + 'a>>;
-    fn verify<'a>(
-        &'a self,
-        token: &'a str,
-    ) -> Pin<Box<dyn Future<Output = Result<i32, Error>> + 'a>>;
+    fn gen(self, id: i32) -> Pin<Box<dyn Future<Output = Result<String, Error>>>>;
+    fn verify(self, token: &str) -> Pin<Box<dyn Future<Output = Result<i32, Error>>>>;
 }
 
 pub trait Storer<T> {
-    fn exists<'a>(
-        &'a self,
-        username: &'a str,
-    ) -> Pin<Box<dyn Future<Output = Result<bool, Error>> + 'a>>;
-    fn insert<'a>(
-        &'a self,
-        username: &'a str,
-        password: &'a str,
-        salt: &'a str,
-    ) -> Pin<Box<dyn Future<Output = Result<T, Error>> + 'a>>;
-    fn get<'a>(
-        &'a self,
-        username: &'a str,
-    ) -> Pin<Box<dyn Future<Output = Result<Account, Error>> + 'a>>;
+    fn exists(self, username: &str) -> Pin<Box<dyn Future<Output = Result<bool, Error>>>>;
+    fn insert(
+        self,
+        username: &str,
+        password: &str,
+        salt: &str,
+    ) -> Pin<Box<dyn Future<Output = Result<T, Error>>>>;
+    fn get(self, username: &str) -> Pin<Box<dyn Future<Output = Result<Account, Error>>>>;
 }
 
 pub trait Hasher {
-    fn gen_salt(&self) -> Pin<Box<dyn Future<Output = Result<String, Error>>>>;
-    fn hash(
-        &self,
-        origin: &str,
-        salt: &str,
-    ) -> Pin<Box<dyn Future<Output = Result<String, Error>>>>;
+    fn gen_salt(self) -> Pin<Box<dyn Future<Output = Result<String, Error>>>>;
+    fn hash(self, origin: &str, salt: &str)
+        -> Pin<Box<dyn Future<Output = Result<String, Error>>>>;
 }
 
-pub fn signup<'a, ST, S: Storer<ST> + 'a, H: Hasher + 'a>(
+pub fn signup<'a, ST, S: Storer<ST> + Copy + 'a, H: Hasher + Copy + 'a>(
     username: &'a str,
     password: &'a str,
     storer: S,

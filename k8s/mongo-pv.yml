@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: with-baby-auth
+  name: mongo-data-0
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: slow
+  hostPath:
+    path: /tmp/with-baby-auth-mongo-0
+
+--- 
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: with-baby-auth
+  name: mongo-data-1
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: slow
+  hostPath: 
+    path: /tmp/with-baby-auth-mongo-1
+
+--- 
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: with-baby-auth
+  name: mongo-data-2
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: slow
+  hostPath: 
+    path: /tmp/with-baby-auth-mongo-2

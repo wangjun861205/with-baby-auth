@@ -1,8 +1,8 @@
 use crate::core;
 use crate::errors::{self, Error};
-use crate::hashers::SHA384Hasher;
+use crate::hashers::sha::SHA384Hasher;
 use crate::storers::mongo::MongoStorer;
-use crate::tokeners::JWTTokener;
+use crate::tokeners::jwt::JWTTokener;
 use actix_header::actix_header;
 use actix_web::body::BoxBody;
 use actix_web::{

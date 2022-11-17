@@ -1,5 +1,5 @@
-use super::core::Tokener;
-use super::errors::{self, Error};
+use crate::core::Tokener;
+use crate::errors::{self, Error};
 use hmac::{Hmac, Mac};
 use jwt::{SignWithKey, VerifyWithKey};
 use serde::{Deserialize, Serialize};
@@ -23,26 +23,28 @@ impl JWTTokener {
 pub struct UID(i32);
 
 impl Tokener for &JWTTokener {
-    fn gen<'a>(
-        &'a self,
+    fn gen(
+        self,
         id: i32,
-    ) -> std::pin::Pin<
-        Box<dyn std::future::Future<Output = Result<String, crate::errors::Error>> + 'a>,
-    > {
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<String, crate::errors::Error>>>>
+    {
+        let key = self.key.clone();
         Box::pin(async move {
             UID(id)
-                .sign_with_key(&self.key)
+                .sign_with_key(&key)
                 .map_err(|e| Error::new(&e.to_string(), errors::FAILED_TO_SIGN_CLAIM))
         })
     }
 
-    fn verify<'a>(
-        &'a self,
-        token: &'a str,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<i32, Error>> + 'a>> {
+    fn verify(
+        self,
+        token: &str,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<i32, Error>>>> {
+        let key = self.key.clone();
+        let token = token.to_owned();
         Box::pin(async move {
             let uid: UID = token
-                .verify_with_key(&self.key)
+                .verify_with_key(&key)
                 .map_err(|e| Error::new(&e.to_string(), errors::FAILED_TO_VERIFY_TOKEN))?;
             Ok(uid.0)
         })

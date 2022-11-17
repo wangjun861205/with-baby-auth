@@ -13,10 +13,10 @@ extern crate diesel;
 use actix_web::web::{get, post, Data};
 use dotenv::dotenv;
 use env_logger;
-use hashers::SHA384Hasher;
+use hashers::sha::SHA384Hasher;
 use log::warn;
 use storers::mongo::MongoStorer;
-use tokeners::JWTTokener;
+use tokeners::jwt::JWTTokener;
 
 #[actix_web::main]
 async fn main() -> Result<(), std::io::Error> {
