@@ -25,13 +25,13 @@ pub struct UID(i32);
 impl Tokener for &JWTTokener {
     fn gen(
         self,
-        id: i32,
+        id: &str,
     ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<String, crate::errors::Error>>>>
     {
         let key = self.key.clone();
+        let id = id.to_owned();
         Box::pin(async move {
-            UID(id)
-                .sign_with_key(&key)
+            id.sign_with_key(&key)
                 .map_err(|e| Error::new(&e.to_string(), errors::FAILED_TO_SIGN_CLAIM))
         })
     }

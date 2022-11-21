@@ -1,6 +1,8 @@
 use crate::core::Storer;
 use crate::errors::{self, Error};
-use mongodb::bson::Bson;
+use crate::models::Account;
+use mongodb::bson::{oid::ObjectId, Bson};
+use serde::Deserialize;
 use std::sync::Arc;
 
 use mongodb::{
@@ -12,6 +14,15 @@ use mongodb::{
 #[derive(Debug, Clone)]
 pub struct MongoStorer {
     client: Arc<Client>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Acct {
+    #[serde(rename(deserialize = "_id"))]
+    id: ObjectId,
+    username: String,
+    password: String,
+    salt: String,
 }
 
 impl MongoStorer {
@@ -49,8 +60,7 @@ impl Storer<String> for &MongoStorer {
     fn get(
         self,
         name: &str,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<crate::models::Account, Error>>>>
-    {
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Account, Error>>>> {
         let client = self.client.clone();
         let name = name.to_owned();
         Box::pin(async move {
@@ -61,7 +71,14 @@ impl Storer<String> for &MongoStorer {
                 .await
                 .map_err(|e| Error::new(&e.to_string(), errors::FAILED_TO_LOAD_RECORD))?;
             if let Some(u) = res {
-                return Ok(bson::from_bson(u).unwrap());
+                let acct: Acct =
+                    bson::from_bson(u).map_err(|e| Error::new(&format!("{}", e), 500))?;
+                return Ok(Account {
+                    id: acct.id.to_hex(),
+                    username: acct.username,
+                    password: acct.password,
+                    salt: acct.salt,
+                });
             }
             Err(Error::new("account not exists", errors::ACCOUNT_NOT_EXISTS))
         })

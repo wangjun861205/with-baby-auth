@@ -18,6 +18,7 @@ spec:
       containers:
       - name: mongo
         image: mongo:latest
+        imagePullPolicy: Never
         command: ["/bin/sh"]
         args: ["-c", "mongod --replSet=rs0 --bind_ip_all"]
         ports:

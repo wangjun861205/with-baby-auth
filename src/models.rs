@@ -11,9 +11,9 @@ pub struct AccountInsertion {
     pub salt: String,
 }
 
-#[derive(Debug, Clone, Insertable, Queryable, Serialize, Deserialize)]
+#[derive(Debug, Clone, Queryable, Serialize, Deserialize)]
 pub struct Account {
-    pub id: i32,
+    pub id: String,
     pub username: String,
     pub password: String,
     pub salt: String,

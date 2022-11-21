@@ -1,0 +1,33 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: with-baby-auth
+spec:
+  addresses:
+  - 172.19.0.200-172.19.0.204
+
+
+---
+
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: with-baby-auth
+spec:
+  ipAddressPools:
+  - with-baby-auth
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: with-baby-auth
+  name: app
+spec:
+  type: LoadBalancer
+  selector:
+    app: app
+  ports:
+  - port: 8000
+    targetPort: 8000

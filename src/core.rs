@@ -4,7 +4,7 @@ use std::future::Future;
 use std::pin::Pin;
 
 pub trait Tokener {
-    fn gen(self, id: i32) -> Pin<Box<dyn Future<Output = Result<String, Error>>>>;
+    fn gen(self, id: &str) -> Pin<Box<dyn Future<Output = Result<String, Error>>>>;
     fn verify(self, token: &str) -> Pin<Box<dyn Future<Output = Result<i32, Error>>>>;
 }
 
@@ -55,7 +55,7 @@ pub fn signin<'a, ST, S: Storer<ST> + 'a, H: Hasher + 'a, T: Tokener + 'a>(
         if hashed_password != account.password {
             return Err(Error::new("invalid credential", INVALID_CREDENTIAL));
         }
-        tokener.gen(account.id).await
+        tokener.gen(&account.id).await
     })
 }
 

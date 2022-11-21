@@ -4,6 +4,7 @@ use crate::diesel::{
     ExpressionMethods, QueryDsl, RunQueryDsl,
 };
 use crate::errors::{self, Error};
+use crate::models::Account;
 use crate::schema::accounts::dsl::*;
 
 use diesel::{
@@ -48,8 +49,7 @@ impl Storer<i32> for &PgStorer {
     fn get(
         self,
         name: &str,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<crate::models::Account, Error>>>>
-    {
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Account, Error>>>> {
         let pool = self.pool.clone();
         let name = name.to_owned();
         Box::pin(async move {
@@ -58,8 +58,14 @@ impl Storer<i32> for &PgStorer {
             })?;
             accounts
                 .filter(username.eq(name))
-                .get_result(&mut conn)
+                .get_result::<(i32, String, String, String)>(&mut conn)
                 .map_err(|e| Error::new(&e.to_string(), errors::FAILED_TO_LOAD_RECORD))
+                .map(|(_id, _username, _password, _salt)| Account {
+                    id: _id.to_string(),
+                    username: _username,
+                    password: _password,
+                    salt: _salt,
+                })
         })
     }
 

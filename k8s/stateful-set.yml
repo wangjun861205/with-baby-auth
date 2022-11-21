@@ -2,26 +2,25 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   namespace: with-baby-auth
-  name: with-baby-auth
+  name: app
 spec:
   selector:
     matchLabels:
-      app: with-baby-auth
-  serviceName: with-baby-auth
+      app: app
+  serviceName: app
   replicas: 3
   template:
     metadata:
       namespace: with-baby-auth
       labels:
-        app: with-baby-auth
+        app: app
     spec:
       containers:
-      - name: with-baby-auth
-        nameapace: with-baby-auth
-        image: with-baby-auth:v0.1
+      - name: app
+        image: with-baby-auth:0.1
         env:
           - name: DATABASE_URL 
-            value: mongodb://mongo-0.mongo:27017,mongo-1.mongo:27017,mongo-2.mongo:27017/?replicaSet=rs0
+            value: mongodb://mongo-0.mongo.with-baby-auth:27017,mongo-1.mongo.with-baby-auth:27017,mongo-2.mongo.with-baby-auth:27017/?replicaSet=rs0
           - name: JWT_KEY
             value: "123456"
         ports:
